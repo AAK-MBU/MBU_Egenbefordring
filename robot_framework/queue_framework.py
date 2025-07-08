@@ -14,6 +14,7 @@ from robot_framework.exceptions import handle_error, BusinessError, log_exceptio
 from robot_framework import process
 from robot_framework import config
 from robot_framework import finalize
+from robot_framework.subprocesses.outlay_ticket_creation import initialize_browser
 
 
 def main():
@@ -23,7 +24,10 @@ def main():
 
     orchestrator_connection.log_trace("Robot Framework started.")
     initialize.initialize(orchestrator_connection)
+    opus_username = orchestrator_connection.get_credential("egenbefordring_udbetaling").username
+    opus_password = orchestrator_connection.get_credential("egenbefordring_udbetaling").password
 
+    browser = None
     queue_element = None
     error_count = 0
     task_count = 0
@@ -32,21 +36,33 @@ def main():
         try:
             reset.reset(orchestrator_connection)
 
+            # Only fetch a new queue element if none exists
+            if queue_element is None:
+                queue_element = orchestrator_connection.get_next_queue_element(config.QUEUE_NAME)
+
+            if browser is None:
+                browser = initialize_browser(opus_username, opus_password)
+
             # Queue loop
             while task_count < config.MAX_TASK_COUNT:
-                task_count += 1
-                queue_element = orchestrator_connection.get_next_queue_element(config.QUEUE_NAME)
+
+                if queue_element is None:  # Fetch the next element if the current is None
+                    queue_element = orchestrator_connection.get_next_queue_element(config.QUEUE_NAME)
 
                 if not queue_element:
                     orchestrator_connection.log_info("Queue empty.")
                     break  # Break queue loop
 
+                task_count += 1  # Increment task count
+
                 try:
-                    process.process(orchestrator_connection, queue_element)
-                    orchestrator_connection.set_queue_element_status(queue_element.id, QueueStatus.DONE)
+                    process.process(orchestrator_connection, queue_element, browser)
+                    orchestrator_connection.set_queue_element_status(queue_element.id, QueueStatus.DONE, "Success")
+                    queue_element = None  # Reset the queue element on success
 
                 except BusinessError as error:
-                    handle_error("BusinessException", None, error, queue_element, orchestrator_connection)
+                    handle_error(message="Business Error", error=error, queue_element=queue_element, orchestrator_connection=orchestrator_connection)
+                    queue_element = None  # Move to the next queue element after handling BusinessError
 
             break  # Break retry loop
 

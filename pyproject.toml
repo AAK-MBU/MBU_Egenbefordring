@@ -3,8 +3,8 @@ requires = ["setuptools>=65.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "robot_framework"
-version = "0.0.2"
+name = "egenbefordring godtgoerelse"
+version = "1.0.0"
 authors = [
   { name="MBU", email="rpa@mbu.aarhus.dk" },
 ]
@@ -12,9 +12,9 @@ readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: Microsoft :: Windows",
 ]
+license = "MIT"
 dependencies = [
     "OpenOrchestrator == 1.*",
     "Pillow == 10.*",
@@ -27,7 +27,9 @@ dependencies = [
     "uiautomation",
     "requests_ntlm >= 1.2.0",
     "pandas >= 2.2.3",
-    "itk-dev-shared-components == 2.9.0"
+    "itk-dev-shared-components == 2.9.0",
+    "mbu_dev_shared_components",
+    "pynput",
 ]
 
 [project.optional-dependencies]

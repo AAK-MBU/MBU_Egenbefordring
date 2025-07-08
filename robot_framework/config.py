@@ -17,11 +17,17 @@ ERROR_EMAIL = "Error Email"
 SERVICE_NOW_API_DEV_USER = "service_now_dev_user"
 SERVICE_NOW_API_PROD_USER = "service_now_prod_user"
 
+SHAREPOINT_REL_URL = "teams/MBU-RPA-Egenbefordring/"
+SHAREPOINT_SITE_URL = "https://aarhuskommune.sharepoint.com/"+SHAREPOINT_REL_URL
+
+DOCUMENT_LIBRARY = "Delte dokumenter/General/Til udbetaling/"
+PATH = "C:\\tmp\\Koerselsgodtgoerelse"
+
 # Queue specific configs
 # ----------------------
 
 # The name of the job queue (if any)
-QUEUE_NAME = None
+QUEUE_NAME = "bur.egenbefordring.main"
 
 # The limit on how many queue elements to process
 MAX_TASK_COUNT = 100

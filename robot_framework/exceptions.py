@@ -15,7 +15,7 @@ class BusinessError(Exception):
     """An empty exception used to identify errors caused by breaking business rules"""
 
 
-def handle_error(message: str, error_count: str | None, error: Exception, queue_element: QueueElement | None, orchestrator_connection: OrchestratorConnection) -> None:
+def handle_error(orchestrator_connection: OrchestratorConnection, message: str, error: Exception, queue_element: QueueElement | None = None, error_count: str | None = None) -> None:
     """Handles an error caught during the process.
     Logs an error to OpenOrchestrator.
     Marks the queue element (if any) as failed.
