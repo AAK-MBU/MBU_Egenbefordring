@@ -9,9 +9,7 @@ from mbu_dev_shared_components.utils.db_stored_procedure_executor import execute
 
 from robot_framework.subprocesses.get_os2form_receipt import fetch_receipt
 from robot_framework.subprocesses.outlay_ticket_creation import handle_opus
-
-
-DIR_PATH = None
+from robot_framework.config import PATH
 
 
 def process(orchestrator_connection: OrchestratorConnection, queue_element, browser) -> None:
@@ -58,9 +56,9 @@ def handle_post_process(failed, queue_element, orchestrator_connection: Orchestr
     excel_filename = element_data['filename']
     connection_string = orchestrator_connection.get_constant("DbConnectionString").value
 
-    excel_files = glob.glob(os.path.join(DIR_PATH, excel_filename))
+    excel_files = glob.glob(os.path.join(PATH, excel_filename))
     if not excel_files:
-        raise FileNotFoundError(f"{excel_filename} not found in {DIR_PATH}.")
+        raise FileNotFoundError(f"{excel_filename} not found in {PATH}.")
 
     file_to_read = excel_files[0]
     df = pd.read_excel(file_to_read, engine='openpyxl')
