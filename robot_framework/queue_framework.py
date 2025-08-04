@@ -61,7 +61,7 @@ def main():
                     queue_element = None  # Reset the queue element on success
 
                 except BusinessError as error:
-                    handle_error(message="Business Error", error=error, queue_element=queue_element, orchestrator_connection=orchestrator_connection)
+                    handle_error(orchestrator_connection=orchestrator_connection, message="Business Error", error=error, queue_element=queue_element)
                     queue_element = None  # Move to the next queue element after handling BusinessError
 
             break  # Break retry loop
