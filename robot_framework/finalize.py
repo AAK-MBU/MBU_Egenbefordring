@@ -65,7 +65,7 @@ def update_sharepoint(orchestrator_connection: OrchestratorConnection, username,
 def upload_file_to_sharepoint(username: str, password: str, path: str, excel_filename: str, sharepoint_folder_name: str) -> None:
     """Upload a file to SharePoint."""
     ctx = ClientContext(config.SHAREPOINT_SITE_URL).with_credentials(UserCredential(username, password))
-    target_folder_url = f"/{config.SHAREPOINT_REL_URL}/{config.DOCUMENT_LIBRARY}"
+    target_folder_url = f"/{config.SHAREPOINT_REL_URL}/{config.DOCUMENT_LIBRARY}/{sharepoint_folder_name}"
     target_folder = ctx.web.get_folder_by_server_relative_url(target_folder_url)
     file_path = os.path.join(path, excel_filename)
     with open(file_path, "rb") as file_content:
