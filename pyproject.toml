@@ -3,7 +3,7 @@ requires = ["setuptools>=65.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "egenbefordring godtgoerelse"
+name = "egenbefordring_godtgoerelse"
 version = "1.0.0"
 authors = [
   { name="MBU", email="rpa@mbu.aarhus.dk" },
