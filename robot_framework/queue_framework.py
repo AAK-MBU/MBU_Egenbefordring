@@ -70,7 +70,7 @@ def main():
         # pylint: disable-next = broad-exception-caught
         except Exception as error:
             error_count += 1
-            handle_error("ApplicationException", error_count, error, queue_element, orchestrator_connection)
+            handle_error(orchestrator_connection=orchestrator_connection, message="ApplicationException", error_count=error_count, error=error, queue_element=queue_element)
 
     reset.clean_up(orchestrator_connection)
     reset.close_all(orchestrator_connection)
