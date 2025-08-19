@@ -7,6 +7,7 @@ from OpenOrchestrator.database.queues import QueueStatus
 from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 from robot_framework import config
+from robot_framework.subprocesses.notify import send_mail
 
 
 def finalize(orchestrator_connection: OrchestratorConnection) -> None:
@@ -16,6 +17,7 @@ def finalize(orchestrator_connection: OrchestratorConnection) -> None:
     username = service_konto_credential.username
     password = service_konto_credential.password
     update_sharepoint(orchestrator_connection, username, password)
+    send_mail(orchestrator_connection=orchestrator_connection)
 
 
 def update_sharepoint(orchestrator_connection: OrchestratorConnection, username, password):
