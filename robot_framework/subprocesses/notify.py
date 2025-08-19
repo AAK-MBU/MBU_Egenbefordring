@@ -1,6 +1,6 @@
 import json
 
-from itk_dev_shared_components.smtp.smtp_util import send_email
+from itk_dev_shared_components.smtp.smtp_util import send_email as _send_email
 from OpenOrchestrator.orchestrator_connection.connection import OrchestratorConnection
 
 from robot_framework import config
@@ -17,7 +17,7 @@ def send_mail(orchestrator_connection: OrchestratorConnection):
                   'og oversigten samt eventuelt relevante dokumenter '
                   f'er uploadet til <a href="{folder_url}">{folder_dest}-mappen</a></p>')
 
-    send_email(
+    _send_email(
         receiver=receiver,
         sender=orchestrator_connection.get_constant("e-mail_noreply").value,
         subject=email_subject,
