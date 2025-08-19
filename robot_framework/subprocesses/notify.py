@@ -27,4 +27,4 @@ def send_mail(orchestrator_connection: OrchestratorConnection):
         html_body=True,
     )
 
-    orchestrator_connection.log_trace(f"E-mail sent to {receiver}")
+    orchestrator_connection.log_trace(f"E-mail sent to following receiver(s): {', '.join(receiver) if isinstance(receiver, list) else receiver}")
