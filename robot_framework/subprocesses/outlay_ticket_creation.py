@@ -109,6 +109,10 @@ def fill_form(browser, element_data):
         By.XPATH,
         root_xpath + "tr[2]/td/div/div/table/tbody/tr/td[1]/div/div/table/tbody/tr[1]/td[2]/div/div/table/tbody/tr/td[2]/div",
     )  # Hent button
+    errorbox = browser.find_elements(By.ID, "WD0324")
+    if len(errorbox) > 0 and errorbox[0].text == 'Kreditoren kunne ikke oprettes automatisk. Det ikke er et SE/CVR eller CPR nummer.':
+        raise BusinessError("Kreditoren ikke oprettet.")
+    # Check creditor exists
     time.sleep(3)
 
     enter_text(
