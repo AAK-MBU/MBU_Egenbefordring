@@ -11,9 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 
-
-class BusinessError(Exception):
-    """An empty exception used to identify errors caused by breaking business rules"""
+from robot_framework.exceptions import BusinessError
 
 
 def initialize_browser(opus_username, opus_password):
