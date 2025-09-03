@@ -3,12 +3,12 @@
 import json
 import traceback
 
-from OpenOrchestrator.database.queues import QueueElement, QueueStatus
+from OpenOrchestrator.database.queues import QueueElement
 from OpenOrchestrator.orchestrator_connection.connection import OrchestratorConnection
 
 from robot_framework import config
 from robot_framework import error_screenshot
-from robot_framework.process import handle_post_process, get_status_params
+from robot_framework.subprocesses.helper_functions import handle_post_process, get_status_params
 
 
 class BusinessError(Exception):
