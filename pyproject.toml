@@ -28,7 +28,7 @@ dependencies = [
     "requests_ntlm >= 1.2.0",
     "pandas >= 2.2.3",
     "itk-dev-shared-components == 2.9.0",
-    "mbu_dev_shared_components",
+    "mbu_dev_shared_components < 4.0.0",
     "pynput",
 ]
 
