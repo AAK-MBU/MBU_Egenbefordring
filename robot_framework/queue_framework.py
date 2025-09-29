@@ -5,15 +5,11 @@
 
 import sys
 
-from OpenOrchestrator.orchestrator_connection.connection import OrchestratorConnection
 from OpenOrchestrator.database.queues import QueueStatus
+from OpenOrchestrator.orchestrator_connection.connection import OrchestratorConnection
 
-from robot_framework import initialize
-from robot_framework import reset
-from robot_framework.exceptions import handle_error, BusinessError, log_exception
-from robot_framework import process
-from robot_framework import config
-from robot_framework import finalize
+from robot_framework import config, finalize, initialize, process, reset
+from robot_framework.exceptions import BusinessError, handle_error, log_exception
 from robot_framework.subprocesses.outlay_ticket_creation import initialize_browser
 
 
@@ -24,8 +20,12 @@ def main():
 
     orchestrator_connection.log_trace("Robot Framework started.")
     initialize.initialize(orchestrator_connection)
-    opus_username = orchestrator_connection.get_credential("egenbefordring_udbetaling").username
-    opus_password = orchestrator_connection.get_credential("egenbefordring_udbetaling").password
+    opus_username = orchestrator_connection.get_credential(
+        "egenbefordring_udbetaling"
+    ).username
+    opus_password = orchestrator_connection.get_credential(
+        "egenbefordring_udbetaling"
+    ).password
 
     browser = None
     queue_element = None
@@ -38,16 +38,21 @@ def main():
 
             # Only fetch a new queue element if none exists
             if queue_element is None:
-                queue_element = orchestrator_connection.get_next_queue_element(config.QUEUE_NAME)
+                queue_element = orchestrator_connection.get_next_queue_element(
+                    config.QUEUE_NAME
+                )
 
             if browser is None:
                 browser = initialize_browser(opus_username, opus_password)
 
             # Queue loop
             while task_count < config.MAX_TASK_COUNT:
-
-                if queue_element is None:  # Fetch the next element if the current is None
-                    queue_element = orchestrator_connection.get_next_queue_element(config.QUEUE_NAME)
+                if (
+                    queue_element is None
+                ):  # Fetch the next element if the current is None
+                    queue_element = orchestrator_connection.get_next_queue_element(
+                        config.QUEUE_NAME
+                    )
 
                 if not queue_element:
                     orchestrator_connection.log_info("Queue empty.")
@@ -57,11 +62,21 @@ def main():
 
                 try:
                     process.process(orchestrator_connection, queue_element, browser)
-                    orchestrator_connection.set_queue_element_status(queue_element.id, QueueStatus.DONE, "Success")
+                    orchestrator_connection.set_queue_element_status(
+                        queue_element.id, QueueStatus.DONE, "Success"
+                    )
                     queue_element = None  # Reset the queue element on success
 
                 except BusinessError as error:
-                    handle_error(orchestrator_connection=orchestrator_connection, message="Business Error", error=error, queue_element=queue_element)
+                    handle_error(
+                        orchestrator_connection=orchestrator_connection,
+                        message="Business Error",
+                        error=error,
+                        queue_element=queue_element,
+                    )
+                    orchestrator_connection.set_queue_element_status(
+                        queue_element.id, QueueStatus.FAILED, "Business Error"
+                    )
                     queue_element = None  # Move to the next queue element after handling BusinessError
 
             break  # Break retry loop
@@ -70,7 +85,13 @@ def main():
         # pylint: disable-next = broad-exception-caught
         except Exception as error:
             error_count += 1
-            handle_error(orchestrator_connection=orchestrator_connection, message="ApplicationException", error_count=error_count, error=error, queue_element=queue_element)
+            handle_error(
+                orchestrator_connection=orchestrator_connection,
+                message="ApplicationException",
+                error_count=error_count,
+                error=error,
+                queue_element=queue_element,
+            )
 
     reset.clean_up(orchestrator_connection)
     reset.close_all(orchestrator_connection)
