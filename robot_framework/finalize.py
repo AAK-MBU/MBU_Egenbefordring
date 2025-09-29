@@ -2,10 +2,11 @@
 
 import os
 from datetime import datetime
-from OpenOrchestrator.orchestrator_connection.connection import OrchestratorConnection
+
+from mbu_msoffice_integration.sharepoint_class import Sharepoint
 from OpenOrchestrator.database.queues import QueueStatus
-from office365.runtime.auth.user_credential import UserCredential
-from office365.sharepoint.client_context import ClientContext
+from OpenOrchestrator.orchestrator_connection.connection import OrchestratorConnection
+
 from robot_framework import config
 from robot_framework.subprocesses.notify import send_mail
 
@@ -13,27 +14,28 @@ from robot_framework.subprocesses.notify import send_mail
 def finalize(orchestrator_connection: OrchestratorConnection) -> None:
     """Do the primary process of the robot."""
     orchestrator_connection.log_trace("Running process.")
-    service_konto_credential = orchestrator_connection.get_credential("SvcRpaMBU002")
-    username = service_konto_credential.username
-    password = service_konto_credential.password
-    update_sharepoint(orchestrator_connection, username, password)
+    update_sharepoint(orchestrator_connection)
     send_mail(orchestrator_connection=orchestrator_connection)
 
 
-def update_sharepoint(orchestrator_connection: OrchestratorConnection, username, password):
+def update_sharepoint(orchestrator_connection: OrchestratorConnection):
     """Update the SharePoint folders."""
     orchestrator_connection.log_trace("Updating SharePoint folders.")
 
     # Check if the provided path_arg is a directory
     if not os.path.isdir(config.PATH):
-        orchestrator_connection.log_trace(f"The provided path is not a directory: {config.PATH}")
+        orchestrator_connection.log_trace(
+            f"The provided path is not a directory: {config.PATH}"
+        )
         return
 
     # Get the list of files in the provided directory
-    excel_files = [f for f in os.listdir(config.PATH) if f.endswith(('.xlsx', '.xls'))]
+    excel_files = [f for f in os.listdir(config.PATH) if f.endswith((".xlsx", ".xls"))]
 
     if not excel_files:
-        orchestrator_connection.log_trace(f"No Excel files found in the directory: {config.PATH}")
+        orchestrator_connection.log_trace(
+            f"No Excel files found in the directory: {config.PATH}"
+        )
         return
 
     # Process each Excel file found
@@ -45,42 +47,73 @@ def update_sharepoint(orchestrator_connection: OrchestratorConnection, username,
                 config.QUEUE_NAME,
                 status=QueueStatus.FAILED,
                 from_date=datetime.today(),
-                to_date=datetime.today())
+                to_date=datetime.today(),
+            )
             if failed_elements:
                 folder_dest = "Fejlet"
-                orchestrator_connection.log_trace(f"Moving Excel file and failed attachments to the '{folder_dest}' folder.")
+                orchestrator_connection.log_trace(
+                    f"Moving Excel file and failed attachments to the '{folder_dest}' folder."
+                )
                 folder_name = os.path.splitext(filename)[0]
-                upload_file_to_sharepoint(username, password, config.PATH, filename, folder_dest)
-                upload_folder_to_sharepoint(username, password, folder_name, folder_dest)
+                upload_file_to_sharepoint(config.PATH, filename, folder_dest)
+                upload_folder_to_sharepoint(folder_name, folder_dest)
             else:
                 folder_dest = "Behandlet"
-                orchestrator_connection.log_trace(f"Uploading Excel file to the '{folder_dest}' folder.")
-                upload_file_to_sharepoint(username, password, config.PATH, filename, folder_dest)
+                orchestrator_connection.log_trace(
+                    f"Uploading Excel file to the '{folder_dest}' folder."
+                )
+                upload_file_to_sharepoint(config.PATH, filename, folder_dest)
 
             # Optionally, delete the file from SharePoint here if needed
-            delete_file_from_sharepoint(username, password, filename)
+            delete_file_from_sharepoint(filename)
 
     orchestrator_connection.log_trace(f"SharePoint folder '{folder_dest}' updated.")
     orchestrator_connection.folder_dest = folder_dest
 
 
-def upload_file_to_sharepoint(username: str, password: str, path: str, excel_filename: str, sharepoint_folder_name: str) -> None:
+def upload_file_to_sharepoint(
+    path: str,
+    excel_filename: str,
+    sharepoint_folder_name: str,
+) -> None:
     """Upload a file to SharePoint."""
-    ctx = ClientContext(config.SHAREPOINT_SITE_URL).with_credentials(UserCredential(username, password))
-    target_folder_url = f"/{config.SHAREPOINT_REL_URL}/{config.DOCUMENT_LIBRARY}/{sharepoint_folder_name}"
-    target_folder = ctx.web.get_folder_by_server_relative_url(target_folder_url)
+
+    sharepoint = Sharepoint(
+        **config.SHAREPOINT_CREDS,
+        site_url=config.SHAREPOINT_SITE_URL,
+        site_name=config.SHAREPOINT_SITE_NAME,
+        document_library=config.DOCUMENT_LIBRARY,
+    )
+
     file_path = os.path.join(path, excel_filename)
-    with open(file_path, "rb") as file_content:
-        target_folder.upload_file(excel_filename, file_content).execute_query()
+    sharepoint_folder_name = f"{config.DOCUMENT_FOLDER}/{sharepoint_folder_name}"
+    sharepoint.upload_file(sharepoint_folder_name, file_path, excel_filename)
 
-    print(f"File '{excel_filename}' has been uploaded successfully to SharePoint in '{sharepoint_folder_name}'.")
+    print(
+        f"File '{excel_filename}' has been uploaded successfully to SharePoint in '{sharepoint_folder_name}'."
+    )
 
 
-def upload_folder_to_sharepoint(username: str, password: str, folder_name: str, sharepoint_folder_name: str) -> None:
+def upload_folder_to_sharepoint(folder_name: str, sharepoint_folder_name: str) -> None:
     """Upload a folder and its contents to SharePoint."""
-    ctx = ClientContext(config.SHAREPOINT_SITE_URL).with_credentials(UserCredential(username, password))
-    target_folder_url = f"/{config.SHAREPOINT_REL_URL}/{config.DOCUMENT_LIBRARY}/{sharepoint_folder_name}"
-    ctx.web.folders.add(target_folder_url).execute_query()
+    sharepoint = Sharepoint(
+        **config.SHAREPOINT_CREDS,
+        site_url=config.SHAREPOINT_SITE_URL,
+        site_name=config.SHAREPOINT_SITE_NAME,
+        document_library=config.DOCUMENT_LIBRARY,
+    )
+
+    target_folder_url = "/".join(
+        [
+            # "teams",
+            # {config.SHAREPOINT_SITE_NAME},
+            config.DOCUMENT_LIBRARY,
+            config.DOCUMENT_FOLDER,
+            sharepoint_folder_name,
+            folder_name,
+        ]
+    )
+    sharepoint.ctx.web.folders.add(target_folder_url).execute_query()
     print(f"Folder '{folder_name}' created in SharePoint.")
 
     local_folder_path = os.path.join(config.PATH, folder_name)
@@ -90,19 +123,36 @@ def upload_folder_to_sharepoint(username: str, password: str, folder_name: str, 
         for file_name in os.listdir(local_folder_path):
             file_full_path = os.path.join(local_folder_path, file_name)
             if os.path.isfile(file_full_path):
-                upload_file_to_sharepoint(username, password, local_folder_path, file_name, updated_sharepoint_folder_name)
+                upload_file_to_sharepoint(
+                    local_folder_path,
+                    file_name,
+                    updated_sharepoint_folder_name,
+                )
 
-    print(f"Folder '{folder_name}' and its contents have been uploaded successfully to SharePoint.")
+    print(
+        f"Folder '{folder_name}' and its contents have been uploaded successfully to SharePoint."
+    )
 
 
-def delete_file_from_sharepoint(username: str, password: str, file_name: str) -> None:
+def delete_file_from_sharepoint(file_name: str) -> None:
     """Delete a file from SharePoint."""
-    ctx = ClientContext(config.SHAREPOINT_SITE_URL).with_credentials(UserCredential(username, password))
-    target_file_url = f"/{config.SHAREPOINT_REL_URL}/{config.DOCUMENT_LIBRARY}/{file_name}"
+    sharepoint = Sharepoint(
+        **config.SHAREPOINT_CREDS,
+        site_url=config.SHAREPOINT_SITE_URL,
+        site_name=config.SHAREPOINT_SITE_NAME,
+        document_library=config.DOCUMENT_LIBRARY,
+    )
+    target_file_url = f"""
+        teams/
+        {config.SHAREPOINT_SITE_NAME}/
+        {config.DOCUMENT_LIBRARY}/
+        {config.DOCUMENT_FOLDER}/
+        {file_name}
+    """
     try:
-        file = ctx.web.get_file_by_server_relative_url(target_file_url)
+        file = sharepoint.ctx.web.get_file_by_server_relative_url(target_file_url)
         file.delete_object()
-        ctx.execute_query()
+        sharepoint.ctx.execute_query()
 
         print(f"File '{file_name}' has been deleted successfully from SharePoint.")
     except Exception as e:  # pylint: disable=broad-except
