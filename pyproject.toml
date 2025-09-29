@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "egenbefordring_godtgoerelse"
-version = "1.1.1"
+version = "1.1.2"
 authors = [
   { name="MBU", email="rpa@mbu.aarhus.dk" },
 ]
@@ -29,6 +29,7 @@ dependencies = [
     "pandas >= 2.2.3",
     "itk-dev-shared-components == 2.9.0",
     "mbu_dev_shared_components < 4.0.0",
+    "mbu_msoffice_integration>=1.0.1",
     "pynput",
 ]
 
