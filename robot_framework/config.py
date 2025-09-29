@@ -1,5 +1,7 @@
 """This module contains configuration constants used across the framework"""
 
+import os
+
 # The number of times the robot retries on an error before terminating.
 MAX_RETRY_COUNT = 3
 
@@ -17,10 +19,18 @@ ERROR_EMAIL = "Error Email"
 SERVICE_NOW_API_DEV_USER = "service_now_dev_user"
 SERVICE_NOW_API_PROD_USER = "service_now_prod_user"
 
-SHAREPOINT_REL_URL = "teams/MBU-RPA-Egenbefordring/"
-SHAREPOINT_SITE_URL = "https://aarhuskommune.sharepoint.com/"+SHAREPOINT_REL_URL
+SHAREPOINT_SITE_NAME = "MBU-RPA-Egenbefordring"
+SHAREPOINT_SITE_URL = "https://aarhuskommune.sharepoint.com/"
 
-DOCUMENT_LIBRARY = "Delte dokumenter/General/Til udbetaling/"
+SHAREPOINT_CREDS = {
+    "tenant": os.getenv("TENANT"),
+    "client_id": os.getenv("CLIENT_ID"),
+    "thumbprint": os.getenv("APPREG_THUMBPRINT"),
+    "cert_path": os.getenv("GRAPH_CERT_PEM"),
+}
+
+DOCUMENT_LIBRARY = "Delte dokumenter"
+DOCUMENT_FOLDER = "General/Til udbetaling"
 PATH = "C:\\tmp\\Koerselsgodtgoerelse"
 
 # Queue specific configs
