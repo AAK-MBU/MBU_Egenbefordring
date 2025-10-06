@@ -142,13 +142,15 @@ def delete_file_from_sharepoint(file_name: str) -> None:
         site_name=config.SHAREPOINT_SITE_NAME,
         document_library=config.DOCUMENT_LIBRARY,
     )
-    target_file_url = f"""
-        teams/
-        {config.SHAREPOINT_SITE_NAME}/
-        {config.DOCUMENT_LIBRARY}/
-        {config.DOCUMENT_FOLDER}/
-        {file_name}
-    """
+    target_file_url = "/".join(
+        [
+            # "teams",
+            # config.SHAREPOINT_SITE_NAME,
+            config.DOCUMENT_LIBRARY,
+            config.DOCUMENT_FOLDER,
+            file_name,
+        ]
+    )
     try:
         file = sharepoint.ctx.web.get_file_by_server_relative_url(target_file_url)
         file.delete_object()

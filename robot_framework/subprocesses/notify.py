@@ -1,3 +1,4 @@
+"""Send mail functions"""
 import json
 
 from itk_dev_shared_components.smtp.smtp_util import send_email as _send_email
