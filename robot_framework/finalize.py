@@ -1,7 +1,7 @@
 """This module defines any finalizing processes to run when the robot starts."""
 
 import os
-from datetime import datetime
+from datetime import datetime, time
 
 from mbu_msoffice_integration.sharepoint_class import Sharepoint
 from OpenOrchestrator.database.queues import QueueStatus
@@ -43,12 +43,18 @@ def update_sharepoint(orchestrator_connection: OrchestratorConnection):
         file_path = os.path.join(config.PATH, filename)
 
         if os.path.isfile(file_path):  # Ensure it's a file
+            today = datetime.today()
+
+            start_of_day = datetime.combine(today.date(), time.min)   # 00:00:00
+            end_of_day = datetime.combine(today.date(), time.max)   # 23:59:59.999999
+
             failed_elements = orchestrator_connection.get_queue_elements(
                 config.QUEUE_NAME,
                 status=QueueStatus.FAILED,
-                from_date=datetime.today(),
-                to_date=datetime.today(),
+                from_date=start_of_day,
+                to_date=end_of_day,
             )
+
             if failed_elements:
                 folder_dest = "Fejlet"
                 orchestrator_connection.log_trace(
