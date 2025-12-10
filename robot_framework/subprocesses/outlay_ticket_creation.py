@@ -235,8 +235,28 @@ def complete_form_and_submit(browser, element_data):
     wait_and_click(browser, By.XPATH, '/html/body/table/tbody/tr/td/div/table/tbody/tr/td/div/table/tbody/tr/td/div/table/tbody/tr[1]/td/div/div[2]/div/div/div/span[4]/div')  # Click 'Kontroller' button
     time.sleep(4)
 
-    # Check for business error here
-    if not browser.find_elements(By.XPATH, "//*[contains(text(), 'Udgiftsbilag er kontrolleret og OK')]"):
+    # # Check for business error here
+    # if not browser.find_elements(By.XPATH, "//*[contains(text(), 'Udgiftsbilag er kontrolleret og OK')]"):
+    #     raise BusinessError("Fejl ved kontrol af udgiftsbilag.")
+
+    # Then retry every 1 second for up to 10 seconds
+    max_retries = 10
+    found = False
+
+    for _ in range(max_retries):
+        if browser.find_elements(
+            By.XPATH,
+            "//*[contains(text(), 'Udgiftsbilag er kontrolleret og OK')]"
+        ):
+            found = True
+            break
+
+        time.sleep(1)
+
+    print()
+
+    # Business error if never found
+    if not found:
         raise BusinessError("Fejl ved kontrol af udgiftsbilag.")
 
     wait_and_click(browser, By.XPATH, '/html/body/table/tbody/tr/td/div/table/tbody/tr/td/div/table/tbody/tr/td/div/table/tbody/tr[1]/td/div/div[2]/div/div/div/span[1]/div')  # Click 'Opret' button
