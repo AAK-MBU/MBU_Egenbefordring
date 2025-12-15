@@ -206,7 +206,18 @@ def process_data(df: pd.DataFrame, naeste_agent: str, filename) -> pd.DataFrame:
             "evt_kommentar": row.get("evt_kommentar"),
         }
 
-        processed_data.append(new_row)
+        if new_row.get("uuid") not in (
+            "8a92a866-6841-4237-a3a2-0287af0cc4ad",
+            "0d313e6c-4687-47af-a577-053158de53c5",
+            "9be4b2c3-e7e3-4888-9bf0-47f9b37650e0",
+            "5416e4dd-bdee-4b58-a93a-6ee36f9a35d8",
+            "42091f88-444c-4d18-9dd4-3a5a3a7c271f",
+            "9d18fd36-683d-4c76-a9ef-ae8051af54fa",
+            "8578ee81-148f-4ba3-bbce-bc05a88264c8",
+            "b9379949-1d6e-4bd3-8b32-88fa766be227",
+            "f7f09cf4-1240-4351-8fa3-75b80f5f03fb",
+        ):
+            processed_data.append(new_row)
 
     df_processed = pd.DataFrame(processed_data)
 
