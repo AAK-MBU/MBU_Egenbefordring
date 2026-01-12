@@ -186,6 +186,17 @@ def process_data(df: pd.DataFrame, naeste_agent: str, filename) -> pd.DataFrame:
                 # Join all but the last part without commas, then add the last part with a comma
                 beloeb_value = "".join(parts[:-1]) + "," + parts[-1]
 
+            # ---- NEW: round to 2 decimals max ----
+            try:
+                # Convert comma to dot for float conversion
+                numeric = float(beloeb_value.replace(",", "."))
+                # Round and convert back with comma
+                beloeb_value = f"{numeric:.2f}".rstrip("0").rstrip(".")
+                beloeb_value = beloeb_value.replace(".", ",")
+            except ValueError:
+                # Fall back silently if it cannot be converted
+                pass
+
         new_row = {
             "filename": filename,
             "cpr_encrypted": encrypted_cpr,
