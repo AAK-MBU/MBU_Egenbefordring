@@ -154,7 +154,6 @@ def process_data(df: pd.DataFrame, naeste_agent: str, filename) -> pd.DataFrame:
     processed_data = []
 
     for _, row in df.iterrows():
-        month_year = extract_months_and_year(row["test"])
         cpr_nr = (
             str(row["cpr_nr_paaanden"])
             if not pd.isnull(row["cpr_nr_paaanden"])
@@ -166,6 +165,9 @@ def process_data(df: pd.DataFrame, naeste_agent: str, filename) -> pd.DataFrame:
             str(row["skoleliste"]).lower() if not pd.isnull(row["skoleliste"]) else ""
         )
         barnets_navn = str(row["barnets_navn"])
+
+        month_year = extract_months_and_year(row["test"])
+        month_year_child_name = f"{month_year}_{barnets_navn}"
 
         psp_value = determine_psp_value(skoleliste, row)
 
@@ -202,7 +204,7 @@ def process_data(df: pd.DataFrame, naeste_agent: str, filename) -> pd.DataFrame:
             "cpr_encrypted": encrypted_cpr,
             "barnets_navn": barnets_navn,
             "beloeb": beloeb_value,
-            "reference": month_year,
+            "reference": month_year_child_name,
             "arts_konto": "40430002",
             "psp": psp_value,
             "posteringstekst": f"Egenbefordring {month_year}",
